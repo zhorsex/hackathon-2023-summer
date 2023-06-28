@@ -1,4 +1,5 @@
 //! Substrate Node Template CLI library.
+
 #![warn(missing_docs)]
 #![allow(
 	clippy::type_complexity,
@@ -8,7 +9,6 @@
 #![cfg_attr(feature = "runtime-benchmarks", deny(unused_crate_dependencies))]
 
 #[cfg(feature = "runtime-benchmarks")]
-
 mod benchmarking;
 mod chain_spec;
 mod cli;

@@ -10,7 +10,7 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-use codec::{Decode, Encode};
+use scale_codec::{Decode, Encode};
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{
@@ -20,7 +20,7 @@ use sp_core::{
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{
-		AccountIdLookup, BlakeTwo256, Block as BlockT, DispatchInfoOf, Dispatchable, Get,
+		AccountIdLookup,IdentityLookup, BlakeTwo256, Block as BlockT, DispatchInfoOf, Dispatchable, Get,
 		IdentifyAccount, NumberFor, PostDispatchInfoOf, UniqueSaturatedInto, Verify,
 	},
 	transaction_validity::{TransactionSource, TransactionValidity, TransactionValidityError},
@@ -181,7 +181,8 @@ impl frame_system::Config for Runtime {
 	/// The identifier used to distinguish between accounts.
 	type AccountId = AccountId;
 	/// The lookup mechanism to get account ID from whatever is passed in dispatchers.
-	type Lookup = AccountIdLookup<AccountId, ()>;
+	// 	type Lookup = AccountIdLookup<AccountId, ()>;
+	type Lookup = IdentityLookup<AccountId>;
 	/// The header type.
 	type Header = generic::Header<BlockNumber, BlakeTwo256>;
 	/// The ubiquitous event type.
@@ -311,11 +312,13 @@ impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorTruncated<F> {
 }
 
 const BLOCK_GAS_LIMIT: u64 = 75_000_000;
+const MAX_POV_SIZE: u64 = 5 * 1024 * 1024;
 
 parameter_types! {
 	pub BlockGasLimit: U256 = U256::from(BLOCK_GAS_LIMIT);
 	pub PrecompilesValue: FrontierPrecompiles<Runtime> = FrontierPrecompiles::<_>::new();
 	pub WeightPerGas: Weight = Weight::from_ref_time(weight_per_gas(BLOCK_GAS_LIMIT, NORMAL_DISPATCH_RATIO, WEIGHT_MILLISECS_PER_BLOCK));
+	// pub const GasLimitPovSizeRatio: u64 = BLOCK_GAS_LIMIT.saturating_div(MAX_POV_SIZE);
 }
 
 impl pallet_evm::Config for Runtime {
@@ -336,6 +339,7 @@ impl pallet_evm::Config for Runtime {
 	type OnChargeTransaction = ();
 	type OnCreate = ();
 	type FindAuthor = FindAuthorTruncated<Aura>;
+	// type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
 	type Timestamp = Timestamp;
   type WeightInfo = ();
 }
@@ -438,7 +442,8 @@ impl fp_rpc::ConvertTransaction<opaque::UncheckedExtrinsic> for TransactionConve
 }
 
 /// The address format for describing accounts.
-pub type Address = sp_runtime::MultiAddress<AccountId, ()>;
+// pub type Address = sp_runtime::MultiAddress<AccountId, ()>;
+pub type Address = AccountId;
 /// Block header type as expected by this runtime.
 pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 /// Block type as expected by this runtime.
