@@ -3,7 +3,8 @@ use std::{collections::BTreeMap, str::FromStr};
 use serde::{Deserialize, Serialize};
 // Substrate
 use sc_chain_spec::{ChainType, Properties};
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+// use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+use sp_consensus_babe::AuthorityId as BabeId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_core::{ecdsa, sr25519, storage::Storage, Pair, Public, H160, U256};
 use sp_runtime::traits::{IdentifyAccount, Verify};
@@ -61,8 +62,8 @@ where
 }
 
 /// Generate an Aura authority key.
-pub fn authority_keys_from_seed(s: &str) -> (AuraId, GrandpaId) {
-	(get_from_seed::<AuraId>(s), get_from_seed::<GrandpaId>(s))
+pub fn authority_keys_from_seed(s: &str) -> (BabeId, GrandpaId) {
+	(get_from_seed::<BabeId>(s), get_from_seed::<GrandpaId>(s))
 }
 
 fn properties() -> Properties {
@@ -181,7 +182,7 @@ fn testnet_genesis(
 	wasm_binary: &[u8],
 	sudo_key: AccountId,
 	endowed_accounts: Vec<AccountId>,
-	initial_authorities: Vec<(AuraId, GrandpaId)>,
+	initial_authorities: Vec<(BabeId, GrandpaId)>,
 	chain_id: u64,
 ) -> GenesisConfig {
 	use frontier_template_runtime::{

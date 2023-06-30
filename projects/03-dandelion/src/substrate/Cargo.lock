@@ -2403,6 +2403,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "frame-remote-externalities"
+version = "0.10.0-dev"
+source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.40#98f2e3451c9143278ec53c6718940aeabcd3b68a"
+dependencies = [
+ "futures",
+ "log",
+ "parity-scale-codec",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "substrate-rpc-client",
+ "tokio",
+]
+
+[[package]]
 name = "frame-support"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.40#98f2e3451c9143278ec53c6718940aeabcd3b68a"
@@ -2552,6 +2568,7 @@ dependencies = [
  "hex-literal",
  "jsonrpsee",
  "log",
+ "pallet-im-online",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc",
  "pallet-transaction-payment-rpc-runtime-api",
@@ -2561,16 +2578,24 @@ dependencies = [
  "sc-cli",
  "sc-client-api",
  "sc-consensus",
- "sc-consensus-aura",
+ "sc-consensus-babe",
+ "sc-consensus-babe-rpc",
+ "sc-consensus-epochs",
  "sc-consensus-grandpa",
+ "sc-consensus-grandpa-rpc",
  "sc-consensus-manual-seal",
+ "sc-consensus-slots",
  "sc-executor",
+ "sc-keystore",
  "sc-network",
  "sc-network-common",
  "sc-network-sync",
  "sc-rpc",
  "sc-rpc-api",
+ "sc-rpc-spec-v2",
  "sc-service",
+ "sc-storage-monitor",
+ "sc-sysinfo",
  "sc-telemetry",
  "sc-transaction-pool",
  "sc-transaction-pool-api",
@@ -2578,20 +2603,25 @@ dependencies = [
  "sp-api",
  "sp-block-builder",
  "sp-blockchain",
- "sp-consensus-aura",
+ "sp-consensus-babe",
  "sp-consensus-grandpa",
  "sp-core",
  "sp-inherents",
+ "sp-io",
+ "sp-keyring",
+ "sp-keystore",
  "sp-offchain",
  "sp-runtime",
  "sp-session",
  "sp-state-machine",
  "sp-timestamp",
  "sp-transaction-pool",
+ "sp-transaction-storage-proof",
  "sp-trie",
  "substrate-build-script-utils",
  "substrate-frame-rpc-system",
  "substrate-prometheus-endpoint",
+ "try-runtime-cli",
 ]
 
 [[package]]
@@ -3454,7 +3484,29 @@ dependencies = [
  "jsonrpsee-proc-macros",
  "jsonrpsee-server",
  "jsonrpsee-types",
+ "jsonrpsee-ws-client",
  "tracing",
+]
+
+[[package]]
+name = "jsonrpsee-client-transport"
+version = "0.16.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "965de52763f2004bc91ac5bcec504192440f0b568a5d621c59d9dbd6f886c3fb"
+dependencies = [
+ "futures-util",
+ "http",
+ "jsonrpsee-core",
+ "jsonrpsee-types",
+ "pin-project",
+ "rustls-native-certs",
+ "soketto",
+ "thiserror",
+ "tokio",
+ "tokio-rustls",
+ "tokio-util",
+ "tracing",
+ "webpki-roots",
 ]
 
 [[package]]
@@ -3465,9 +3517,11 @@ checksum = "a4e70b4439a751a5de7dd5ed55eacff78ebf4ffe0fc009cb1ebb11417f5b536b"
 dependencies = [
  "anyhow",
  "arrayvec 0.7.2",
+ "async-lock",
  "async-trait",
  "beef",
  "futures-channel",
+ "futures-timer",
  "futures-util",
  "globset",
  "hyper",
@@ -3530,6 +3584,18 @@ dependencies = [
  "serde_json",
  "thiserror",
  "tracing",
+]
+
+[[package]]
+name = "jsonrpsee-ws-client"
+version = "0.16.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0b83daeecfc6517cfe210df24e570fb06213533dfb990318fae781f4c7119dd9"
+dependencies = [
+ "http",
+ "jsonrpsee-client-transport",
+ "jsonrpsee-core",
+ "jsonrpsee-types",
 ]
 
 [[package]]
@@ -5099,6 +5165,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-im-online"
+version = "4.0.0-dev"
+source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.40#98f2e3451c9143278ec53c6718940aeabcd3b68a"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "log",
+ "pallet-authorship",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-application-crypto",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-staking",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-session"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.40#98f2e3451c9143278ec53c6718940aeabcd3b68a"
@@ -6613,6 +6699,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "sc-consensus-babe-rpc"
+version = "0.10.0-dev"
+source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.40#98f2e3451c9143278ec53c6718940aeabcd3b68a"
+dependencies = [
+ "futures",
+ "jsonrpsee",
+ "sc-consensus-babe",
+ "sc-consensus-epochs",
+ "sc-rpc-api",
+ "serde",
+ "sp-api",
+ "sp-application-crypto",
+ "sp-blockchain",
+ "sp-consensus",
+ "sp-consensus-babe",
+ "sp-core",
+ "sp-keystore",
+ "sp-runtime",
+ "thiserror",
+]
+
+[[package]]
 name = "sc-consensus-epochs"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.40#98f2e3451c9143278ec53c6718940aeabcd3b68a"
@@ -6662,6 +6770,26 @@ dependencies = [
  "sp-keystore",
  "sp-runtime",
  "substrate-prometheus-endpoint",
+ "thiserror",
+]
+
+[[package]]
+name = "sc-consensus-grandpa-rpc"
+version = "0.10.0-dev"
+source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.40#98f2e3451c9143278ec53c6718940aeabcd3b68a"
+dependencies = [
+ "finality-grandpa",
+ "futures",
+ "jsonrpsee",
+ "log",
+ "parity-scale-codec",
+ "sc-client-api",
+ "sc-consensus-grandpa",
+ "sc-rpc",
+ "serde",
+ "sp-blockchain",
+ "sp-core",
+ "sp-runtime",
  "thiserror",
 ]
 
@@ -8613,6 +8741,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "substrate-rpc-client"
+version = "0.10.0-dev"
+source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.40#98f2e3451c9143278ec53c6718940aeabcd3b68a"
+dependencies = [
+ "async-trait",
+ "jsonrpsee",
+ "log",
+ "sc-rpc-api",
+ "serde",
+ "sp-runtime",
+]
+
+[[package]]
 name = "substrate-wasm-builder"
 version = "5.0.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.40#98f2e3451c9143278ec53c6718940aeabcd3b68a"
@@ -9175,6 +9316,42 @@ name = "try-lock"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3528ecfd12c466c6f163363caf2d02a71161dd5e1cc6ae7b34207ea2d42d81ed"
+
+[[package]]
+name = "try-runtime-cli"
+version = "0.10.0-dev"
+source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.40#98f2e3451c9143278ec53c6718940aeabcd3b68a"
+dependencies = [
+ "async-trait",
+ "clap",
+ "frame-remote-externalities",
+ "hex",
+ "log",
+ "parity-scale-codec",
+ "sc-cli",
+ "sc-executor",
+ "sc-service",
+ "serde",
+ "serde_json",
+ "sp-api",
+ "sp-consensus-aura",
+ "sp-consensus-babe",
+ "sp-core",
+ "sp-debug-derive",
+ "sp-externalities",
+ "sp-inherents",
+ "sp-io",
+ "sp-keystore",
+ "sp-rpc",
+ "sp-runtime",
+ "sp-state-machine",
+ "sp-timestamp",
+ "sp-transaction-storage-proof",
+ "sp-version",
+ "sp-weights",
+ "substrate-rpc-client",
+ "zstd",
+]
 
 [[package]]
 name = "tt-call"

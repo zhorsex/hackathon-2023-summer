@@ -12,7 +12,8 @@ use sc_network_common::sync::warp::WarpSyncParams;
 use sc_service::{error::Error as ServiceError, Configuration, PartialComponents, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker};
 use sp_api::{ConstructRuntimeApi, TransactionFor};
-use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
+// use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
+// use sp_consensus_babe::AuthorityPair as BabePair;
 use sp_core::U256;
 use sp_runtime::traits::BlakeTwo256;
 use sp_trie::PrefixedMemoryDB;
@@ -188,33 +189,50 @@ where
 		frontier_backend,
 	);
 
-	let slot_duration = sc_consensus_aura::slot_duration(&*client)?;
+	let (block_import, babe_link) = sc_consensus_babe::block_import(
+		sc_consensus_babe::configuration(&*client)?,
+		grandpa_block_import,
+		client.clone(),
+	)?;
+
+	let slot_duration =  babe_link.config().slot_duration();
 	let target_gas_price = eth_config.target_gas_price;
 	let create_inherent_data_providers = move |_, ()| async move {
 		let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
-		let slot =
-			sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
-				*timestamp,
-				slot_duration,
-			);
+		let slot = sp_consensus_babe::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
+			*timestamp,
+			slot_duration,
+		);
+
 		let dynamic_fee = fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
 		Ok((slot, timestamp, dynamic_fee))
 	};
 
-	let import_queue = sc_consensus_aura::import_queue::<AuraPair, _, _, _, _, _>(
-		sc_consensus_aura::ImportQueueParams {
-			block_import: frontier_block_import.clone(),
-			justification_import: Some(Box::new(grandpa_block_import)),
-			client,
-			create_inherent_data_providers,
-			spawner: &task_manager.spawn_essential_handle(),
-			registry: config.prometheus_registry(),
-			check_for_equivocation: Default::default(),
-			telemetry,
-			compatibility_mode: sc_consensus_aura::CompatibilityMode::None,
+	let select_chain = sc_consensus::LongestChain::new(frontier_backend.clone());
+
+	let justification_import = grandpa_block_import.clone();
+
+	let import_queue = sc_consensus_babe::import_queue(
+		babe_link.clone(),
+		block_import.clone(),
+		Some(Box::new(justification_import)),
+		client.clone(),
+		select_chain.clone(),
+		move |_, ()| async move {
+			let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
+
+			let slot =
+				sp_consensus_babe::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
+					*timestamp,
+					slot_duration,
+				);
+
+			Ok((slot, timestamp))
 		},
-	)
-	.map_err::<ServiceError, _>(Into::into)?;
+		&task_manager.spawn_essential_handle(),
+		config.prometheus_registry(),
+		telemetry.as_ref().map(|x| x.handle()),
+	)?;
 
 	Ok((import_queue, Box::new(frontier_block_import)))
 }
