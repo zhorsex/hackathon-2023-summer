@@ -3,7 +3,7 @@ use std::{collections::BTreeMap, str::FromStr};
 use serde::{Deserialize, Serialize};
 // Substrate
 use sc_chain_spec::{ChainType, Properties};
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+use sp_consensus_babe::AuthorityId as BabeId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
 #[allow(unused_imports)]
 use sp_core::ecdsa;
@@ -64,9 +64,9 @@ where
 	AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
 }
 
-/// Generate an Aura authority key.
-pub fn authority_keys_from_seed(s: &str) -> (AuraId, GrandpaId) {
-	(get_from_seed::<AuraId>(s), get_from_seed::<GrandpaId>(s))
+/// Generate an Babe authority key.
+pub fn authority_keys_from_seed(s: &str) -> (BabeId, GrandpaId) {
+	(get_from_seed::<BabeId>(s), get_from_seed::<GrandpaId>(s))
 }
 
 fn properties() -> Properties {
@@ -169,11 +169,11 @@ fn testnet_genesis(
 	wasm_binary: &[u8],
 	sudo_key: AccountId,
 	endowed_accounts: Vec<AccountId>,
-	initial_authorities: Vec<(AuraId, GrandpaId)>,
+	initial_authorities: Vec<(BabeId, GrandpaId)>,
 	chain_id: u64,
 ) -> GenesisConfig {
 	use frontier_template_runtime::{
-		AuraConfig, BalancesConfig, EVMChainIdConfig, EVMConfig, GrandpaConfig, SudoConfig,
+		BabeConfig, BABE_GENESIS_EPOCH_CONFIG, BalancesConfig, EVMChainIdConfig, EVMConfig, GrandpaConfig, SudoConfig,
 		SystemConfig,
 	};
 
@@ -200,8 +200,9 @@ fn testnet_genesis(
 		transaction_payment: Default::default(),
 
 		// Consensus
-		aura: AuraConfig {
-			authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect(),
+		babe: BabeConfig {
+			authorities: initial_authorities.iter().map(|x| (x.0.clone(), 100)).collect(),
+			epoch_config: Some(BABE_GENESIS_EPOCH_CONFIG),
 		},
 		grandpa: GrandpaConfig {
 			authorities: initial_authorities
