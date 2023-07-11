@@ -70,7 +70,7 @@ function MyAirDropTokenOrNull({ airDrop }: { airDrop: AirDrop }) {
     watch: true,
   });
 
-  if (data && data.lt(BigNumber.from(0))) {
+  if (data && data.gt(BigNumber.from(0))) {
     return <MyAirDropToken airDrop={airDrop} />;
   } else {
     return null;
